@@ -16,6 +16,10 @@ inputs:
     description: --resource option
     required: true
     default: ""
+  environment:
+    description: Environment to deploy (default prod)
+    required: true
+    default: prod
   deploy-tag:
     description: Tag to deploy (default is github.sha)
     required: true
