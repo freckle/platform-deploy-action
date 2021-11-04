@@ -33,7 +33,7 @@ runs:
         options=( --environment '${{ inputs.environment }}' )
 
         if [[ -n '${{ inputs.app-resource }}' ]]; then
-          options+=( --resource '${{ inputs.resource }}' )
+          options+=( --resource '${{ inputs.app-resource }}' )
         fi
 
         tag=${{ inputs.deploy-tag }}
