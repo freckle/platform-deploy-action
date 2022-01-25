@@ -40,6 +40,11 @@ runs:
       run: |
         options=( --environment '${{ inputs.environment }}' )
 
+        # Check if we support --color
+        if platform --color always version &>/dev/null; then
+          options=+( --color always )
+        fi
+
         if [[ -n '${{ inputs.app-resource }}' ]]; then
           options+=( --resource '${{ inputs.app-resource }}' )
         fi
