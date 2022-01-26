@@ -24,10 +24,6 @@ inputs:
     description: Tag to deploy (default is github.sha)
     required: true
     default: ""
-  notify:
-    description: Notify Slack? Requires SLACK_WEBHOOK in env
-    required: true
-    default: 'true'
 outputs: {}
 runs:
   using: composite
@@ -57,7 +53,8 @@ runs:
         cd '${{ inputs.app-directory }}'
         platform "${options[@]}"
 
-    - uses: 8398a7/action-slack@v3
+    - if: ${{ always() && startsWith(env.SLACK_WEBHOOK_URL, 'http') }}
+      uses: 8398a7/action-slack@v3
       with:
         status: custom
         fields: workflow,job,commit,repo,took
@@ -68,4 +65,3 @@ runs:
               text: `${process.env.AS_WORKFLOW}\n${process.env.AS_JOB} (${process.env.AS_COMMIT}) of ${process.env.AS_REPO} ${{ job.status }} in ${process.env.AS_TOOK} (cc:${{ github.actor }})`,
             }]
           }
-      if: ${{ always() && inputs.notify == 'true' }}
