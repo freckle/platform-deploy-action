@@ -13,21 +13,20 @@ outside Freckle.
 ```yaml
 jobs:
   image:
-    env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      AWS_DEFAULT_REGION: us-east-1
-      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
     runs-on: ubuntu-latest
     steps:
+      - uses: aws-actions/configure-aws-credentials@v1
+        with:
+          # ...
       - uses: actions/checkout@v2
-      - uses: freckle/platform-deploy-action@main
+      - uses: freckle/platform-deploy-action@v3
+        with:
+          slack-webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
 ```
 
 ## Environment
 
-- `AWS_*`: AWS configuration for the target account
-- `SLACK_WEBHOOK_URL`: where to notify of deployment outcome
+None.
 
 ## Inputs
 
