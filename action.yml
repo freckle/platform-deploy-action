@@ -24,10 +24,10 @@ inputs:
     description: Tag to deploy (default is github.sha)
     required: true
     default: ""
-  notify:
-    description: Notify Slack? Requires SLACK_WEBHOOK in env
+  slack-webhook:
+    description: Slack Webhook URL, will not notify if empty
     required: true
-    default: 'true'
+    default: ''
 outputs: {}
 runs:
   using: composite
@@ -56,16 +56,14 @@ runs:
 
         cd '${{ inputs.app-directory }}'
         platform "${options[@]}"
-
-    - uses: 8398a7/action-slack@v3
-      with:
-        status: custom
-        fields: workflow,job,commit,repo,took
-        custom_payload: |
-          {
-            attachments: [{
-              color: '${{ job.status }}' === 'success' ? 'good' : '${{ job.status }}' === 'failure' ? 'danger' : 'warning',
-              text: `${process.env.AS_WORKFLOW}\n${process.env.AS_JOB} (${process.env.AS_COMMIT}) of ${process.env.AS_REPO} ${{ job.status }} in ${process.env.AS_TOOK} (cc:${{ github.actor }})`,
-            }]
-          }
-      if: ${{ always() && inputs.notify == 'true' }}
+    - if: ${{ always() && inputs.slack-webhook }}
+      uses: rtCamp/action-slack-notify@v2
+      env:
+        SLACK_COLOR: ${{ job.status }}
+        SLACK_ICON: https://github.com/freckle-automation.png?size=48
+        SLACK_USERNAME: GitHub Actions
+        SLACK_TITLE: ${{ github.repository }} deployment
+        SLACK_MESSAGE: ${{ job.status }}
+        SLACK_FOOTER: ''
+        SLACK_WEBHOOK: ${{ inputs.slack-webhook }}
+        MSG_MINIMAL: actions url,commit
