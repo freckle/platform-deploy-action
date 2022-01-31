@@ -42,7 +42,7 @@ runs:
 
         # Check if we support --color
         if platform --color always version &>/dev/null; then
-          options=+( --color always )
+          options+=( --color always )
         fi
 
         if [[ -n '${{ inputs.app-resource }}' ]]; then
