@@ -1,13 +1,12 @@
 description: Deploy using the Freckle Platform CLI
 inputs:
-  platform-version:
+  platform-setup-version:
     description: Version of Platform CLI to install
     required: true
-    default: latest
-  platform-suffix:
-    description: OS-specific suffix for Platform package archive
+    default: ""
+  platform-setup-token:
+    description: GitHub token with access to freckle/platform artifacts
     required: true
-    default: x86_64-linux
   app-directory:
     description: Directory containing the App's .platform
     required: true
@@ -17,45 +16,37 @@ inputs:
     required: true
     default: ""
   environment:
-    description: Environment to deploy (default prod)
+    description: Environment to deploy (required)
     required: true
-    default: prod
-  deploy-tag:
-    description: Tag to deploy (default is github.sha)
-    required: true
-    default: ""
   slack-webhook:
     description: Slack Webhook URL, will not notify if empty
     required: true
-    default: ''
+    default: ""
 outputs: {}
 runs:
   using: composite
   steps:
-    - uses: freckle/setup-platform-action@v4
+    - uses: freckle/setup-platform-action@v6
       with:
-        version: ${{ inputs.platform-version }}
-        suffix: ${{ inputs.platform-suffix }}
+        version: ${{ inputs.platform-setup-version }}
+        token: ${{ inputs.platform-setup-token }}
+
     - shell: bash
       run: |
-        options=( --environment '${{ inputs.environment }}' )
-
-        # Check if we support --color
-        if platform --color always version &>/dev/null; then
-          options+=( --color always )
-        fi
+        cd '${{ inputs.app-directory }}'
+        options=()
 
         if [[ -n '${{ inputs.app-resource }}' ]]; then
           options+=( --resource '${{ inputs.app-resource }}' )
         fi
 
-        tag=${{ inputs.deploy-tag }}
-        tag=${tag:-${{ github.sha }}}
+        if platform --color always version &>/dev/null; then
+          options+=( --color always )
+        fi
 
-        options+=( deploy --tag "$tag" --no-confirm )
+        platform --environment '${{ inputs.environment }}' "${options[@]}" \
+          deploy --tag '${{ github.sha }}' --no-confirm
 
-        cd '${{ inputs.app-directory }}'
-        platform "${options[@]}"
     - if: ${{ always() && inputs.slack-webhook }}
       uses: rtCamp/action-slack-notify@v2
       env:
