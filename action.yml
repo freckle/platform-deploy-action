@@ -55,6 +55,6 @@ runs:
         SLACK_USERNAME: GitHub Actions
         SLACK_TITLE: ${{ github.repository }} deployment
         SLACK_MESSAGE: ${{ job.status }}
-        SLACK_FOOTER: ''
+        SLACK_FOOTER: ""
         SLACK_WEBHOOK: ${{ inputs.slack-webhook }}
         MSG_MINIMAL: actions url,commit
