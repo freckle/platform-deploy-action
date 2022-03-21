@@ -19,7 +19,7 @@ jobs:
         with:
           # ...
       - uses: actions/checkout@v2
-      - uses: freckle/platform-deploy-action@v3
+      - uses: freckle/platform-deploy-action@v4
         with:
           slack-webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
 ```
