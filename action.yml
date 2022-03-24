@@ -53,13 +53,23 @@ runs:
           '${{ github.sha }}'
 
     - if: ${{ always() && inputs.slack-webhook }}
+      id: prep
+      shell: bash
+      run: |
+        # action_status has been coming out as "Failure", not "failure" as the
+        # docs indicate. To use it as a Slack color, it needs to be
+        # lower-case, so we'll fix that here.
+        status=${{ github.action_status }}
+        printf '::set-output name=status::%s\n' "${status,,}"
+
+    - if: ${{ always() && inputs.slack-webhook }}
       uses: rtCamp/action-slack-notify@v2
       env:
-        SLACK_COLOR: ${{ github.action_status }}
+        SLACK_COLOR: ${{ steps.prep.outputs.status }}
         SLACK_ICON: https://github.com/freckle-automation.png?size=48
         SLACK_USERNAME: GitHub Actions
         SLACK_TITLE: ${{ github.repository }} deployment
-        SLACK_MESSAGE: ${{ github.action_status }}
+        SLACK_MESSAGE: ${{ steps.prep.outputs.status }}
         SLACK_FOOTER: ${{ steps.deploy.outputs.image }}
         SLACK_WEBHOOK: ${{ inputs.slack-webhook }}
         MSG_MINIMAL: actions url,commit
