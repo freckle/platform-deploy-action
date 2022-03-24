@@ -31,7 +31,8 @@ runs:
         version: ${{ inputs.platform-setup-version }}
         token: ${{ inputs.platform-setup-token }}
 
-    - shell: bash
+    - id: deploy
+      shell: bash
       run: |
         cd '${{ inputs.app-directory }}'
         options=()
@@ -47,6 +48,10 @@ runs:
         platform --environment '${{ inputs.environment }}' "${options[@]}" \
           deploy --tag '${{ github.sha }}' --no-confirm
 
+        printf '::set-output name=image::%s:%s\n' \
+          "$(platform "${options[@]}" query settings.EcrRepository)" \
+          '${{ github.sha }}'
+
     - if: ${{ always() && inputs.slack-webhook }}
       uses: rtCamp/action-slack-notify@v2
       env:
@@ -55,6 +60,6 @@ runs:
         SLACK_USERNAME: GitHub Actions
         SLACK_TITLE: ${{ github.repository }} deployment
         SLACK_MESSAGE: ${{ github.action_status }}
-        SLACK_FOOTER: ""
+        SLACK_FOOTER: ${{ steps.deploy.outputs.image }}
         SLACK_WEBHOOK: ${{ inputs.slack-webhook }}
         MSG_MINIMAL: actions url,commit
