@@ -48,9 +48,9 @@ runs:
         platform --environment '${{ inputs.environment }}' "${options[@]}" \
           deploy --tag '${{ github.sha }}' --no-confirm
 
-        printf '::set-output name=image::%s:%s\n' \
+        printf 'image=%s:%s\n' \
           "$(platform "${options[@]}" query settings.EcrRepository)" \
-          '${{ github.sha }}'
+          '${{ github.sha }}' >>"$GITHUB_OUTPUT"
 
     - if: ${{ always() && inputs.slack-webhook }}
       id: prep
@@ -60,7 +60,7 @@ runs:
         # docs indicate. To use it as a Slack color, it needs to be
         # lower-case, so we'll fix that here.
         status=${{ github.action_status }}
-        printf '::set-output name=status::%s\n' "${status,,}"
+        printf 'status=%s\n' "${status,,}" >>"$GITHUB_OUTPUT"
 
     - if: ${{ always() && inputs.slack-webhook }}
       uses: rtCamp/action-slack-notify@v2
