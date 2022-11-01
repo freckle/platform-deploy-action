@@ -48,9 +48,13 @@ runs:
         platform --environment '${{ inputs.environment }}' "${options[@]}" \
           deploy --tag '${{ github.sha }}' --no-confirm
 
-        printf 'image=%s:%s\n' \
-          "$(platform "${options[@]}" query settings.EcrRepository)" \
-          '${{ github.sha }}' >>"$GITHUB_OUTPUT"
+        {
+          printf 'stackNames='
+          platform --environment '${{ inputs.environment }}' "${options[@]}" \
+            query settings.StackName |
+              paste -s -d, - |
+              sed 's/,$//; s/,/, /g'
+        } >>"$GITHUB_OUTPUT"
 
     - if: ${{ always() && inputs.slack-webhook }}
       id: prep
@@ -70,6 +74,6 @@ runs:
         SLACK_USERNAME: GitHub Actions
         SLACK_TITLE: ${{ github.repository }} deployment
         SLACK_MESSAGE: ${{ steps.prep.outputs.status }}
-        SLACK_FOOTER: ${{ steps.deploy.outputs.image }}
+        SLACK_FOOTER: ${{ steps.deploy.outputs.stackNames }}
         SLACK_WEBHOOK: ${{ inputs.slack-webhook }}
         MSG_MINIMAL: actions url,commit
