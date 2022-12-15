@@ -21,6 +21,10 @@ inputs:
   slack-webhook:
     description: Slack Webhook URL with which to notify, if desired
     default: "unused"
+  ignore-status:
+    description: Avoid notifying on matching action_status (given as JSON array of strings)
+    required: true
+    default: "[]"
 outputs: {}
 runs:
   using: composite
@@ -65,7 +69,7 @@ runs:
         status=${{ github.action_status }}
         printf 'status=%s\n' "${status,,}" >>"$GITHUB_OUTPUT"
 
-    - if: ${{ always() && inputs.slack-webhook != 'unused' }}
+    - if: ${{ always() && inputs.slack-webhook != 'unused' && !contains(fromJSON(inputs.ignore-status), steps.prep.outputs.status) }}
       uses: rtCamp/action-slack-notify@v2
       env:
         SLACK_COLOR: ${{ steps.prep.outputs.status }}
