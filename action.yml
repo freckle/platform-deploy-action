@@ -48,7 +48,7 @@ runs:
         if platform --color always version &>/dev/null; then
           options+=( --color always )
         fi
-        
+
         if '${{ inputs.dry-run }}'; then
           echo "Dry run: Skipping deploy"
           echo "stackNames=" >>"$GITHUB_OUTPUT"
