@@ -21,11 +21,16 @@ inputs:
   slack-webhook:
     description: Slack Webhook URL with which to notify, if desired
     default: "unused"
+  dry-run:
+    description: Skip deploying the App
+    require: true
+    default: false
 outputs: {}
 runs:
   using: composite
   steps:
-    - uses: freckle/setup-platform-action@v6
+    - if: ${{ always() && !inputs.dry-run }}
+      uses: freckle/setup-platform-action@v6
       with:
         version: ${{ inputs.platform-setup-version }}
         token: ${{ inputs.platform-setup-token }}
@@ -42,6 +47,12 @@ runs:
 
         if platform --color always version &>/dev/null; then
           options+=( --color always )
+        fi
+
+        if '${{ inputs.dry-run }}'; then
+          echo "Dry run: Skipping deploy"
+          echo "stackNames=" >>"$GITHUB_OUTPUT"
+          exit 0
         fi
 
         platform --environment '${{ inputs.environment }}' "${options[@]}" \
