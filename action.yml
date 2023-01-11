@@ -22,14 +22,14 @@ inputs:
     description: Slack Webhook URL with which to notify, if desired
     default: "unused"
   dry-run:
-    description: Skip deploying the App
+    description: Set to "true" to skip deploying the App
     require: true
     default: false
 outputs: {}
 runs:
   using: composite
   steps:
-    - if: ${{ always() && !inputs.dry-run }}
+    - if: ${{ inputs.dry-run != 'true' }}
       uses: freckle/setup-platform-action@v6
       with:
         version: ${{ inputs.platform-setup-version }}
